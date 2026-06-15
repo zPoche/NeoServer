@@ -146,6 +146,7 @@ These commands are primarily for development and testing. The usage of many of t
 |giveuscore|`/giveuscore <uscore>`|Gives uscore|8|
 |gmadditem|`/gmadditem <id> (count)`|Adds the given item to your inventory by id. Aliases: `/give`.|8|
 |inspect|`/inspect <component or ldf variable or player name> (-m <waypoint> | -a <animation> | -s | -p | -f (faction) | -t)`|Finds the closest entity with the given component or LNV variable (ignoring players and racing cars), printing its ID, distance from the player, and whether it is sleeping, as well as the IDs of all components the entity has. See detailed usage in the DLU docs|8|
+|inspect-despawn|`/inspect-despawn <component>`|Finds the closest entity with the given component or LDF variable and despawns it. Alias: `/inspect-destroy`|8|
 |list-spawns|`/list-spawns`|Lists all the character spawn points in the zone. Additionally, this command will display the current scene that plays when the character lands in the next zone, if there is one. Aliases: `/listspawns`.|8|
 |locrow|`/locrow`|Prints your current position and rotation information to the console|8|
 |lookup|`/lookup <query>`|Searches through the Objects table in the client SQLite database for items whose display name, name, or description contains the query. Query can be multiple words delimited by spaces.|8|
@@ -164,7 +165,7 @@ These commands are primarily for development and testing. The usage of many of t
 |setflag|`/setflag (value) <flag id>`|Sets the given inventory or health flag to the given value, where value can be one of "on" or "off". If no value is given, by default this adds the flag to your character (equivalent of calling `/setflag on <flag id>`)|8|
 |setinventorysize|`/setinventorysize <size> (inventory)`|Sets your inventory size to the given size. If `inventory` is provided, the number or string will be used to set that inventory to the requested size. Aliases: `/setinvsize`, `/setinvensize`.|8|
 |setuistate|`/setuistate <ui state>`|Changes UI state|8|
-|spawn|`/spawn <id>`|Spawns an object at your location by id|8|
+|spawn|`/spawn <id> (<x> <y> <z> (<rotw> <rotx> <roty> <rotz>)) (<groupname>)`|Spawns an object by id at your position, or with optional position, rotation, and group name|8|
 |spawngroup|`/spawngroup <id> <amount> <radius>`|Spawns `<amount>` of object `<id>` within the given `<radius>` from your location|8|
 |speedboost|`/speedboost <amount>`|Sets the speed multiplier to the given amount. `/speedboost 1.5` will set the speed multiplier to 1.5x the normal speed|8|
 |startcelebration|`/startcelebration <id>`|Starts a celebration effect on your character|8|
@@ -180,7 +181,23 @@ These commands are primarily for development and testing. The usage of many of t
 |getfactions|`/getfactions`|Shows the player's factions|8|
 |setrewardcode|`/setrewardcode <code>`|Sets the rewardcode for the account you are logged into if it's a valid rewardcode, See cdclient table `RewardCodes`|8|
 |barfight|`/barfight`|Starts a barfight (turns everyones pvp on)|8|
-|despawn|`/despawn <object id>`|Despawns an object by id|8|
+|despawn|`/despawn <object id>`|Despawns an object by object id|8|
+|despawn-group|`/despawn-group <groupname>`|Despawns all entities in a given group. Alias: `/despawngroup`|8|
+|despawn-player-spawns|`/despawn-player-spawns <player name>`|Despawns all entities spawned by a given player. Alias: `/despawnplayerspawns`|8|
+|despawn-my-spawns|`/despawn-my-spawns`|Despawns all entities spawned by you. Alias: `/despawnmyspawns`|8|
+|despawn-by-spawner-id|`/despawn-by-spawner-id <spawner id>`|Despawns all entities with a given spawner id. Alias: `/despawnbyspawnerid`|8|
+|despawn-all-player-spawns|`/despawn-all-player-spawns`|Despawns all entities spawned by online players. Alias: `/despawnallplayerspawns`|8|
+|list-group|`/list-group <groupname>`|Lists all entities in a given group. Alias: `/listgroup`|8|
+|list-spawned-by-player|`/list-spawned-by-player <player name>`|Lists all entities spawned by a given player. Alias: `/listspawnedbyplayer`|8|
+|list-my-spawns|`/list-my-spawns`|Lists all entities spawned by you. Aliases: `/listmyspawns`, `/my-spawns`|8|
+|list-spawned-by-id|`/list-spawned-by-id <spawner id>`|Lists all entities with a given spawner id. Alias: `/listspawnedbyid`|8|
+|list-all-player-spawns|`/list-all-player-spawns`|Lists all entities spawned by online players. Alias: `/listallplayerspawns`|8|
+|playerid|`/playerid (player name)`|Gets your player's object id, or that of another character by name. Alias: `/getplayerid`|8|
+|save-group|`/save-group <groupname>`|Saves all entities in a given group to the bug report table. Alias: `/savegroup`|8|
+|save-player-spawns|`/save-player-spawns <player name>`|Saves all entities spawned by a given player. Alias: `/saveplayerspawns`|8|
+|save-my-spawns|`/save-my-spawns`|Saves all entities spawned by you. Alias: `/savemyspawns`|8|
+|save-by-spawner-id|`/save-by-spawner-id <spawner id>`|Saves all entities with a given spawner id. Alias: `/savebyspawnerid`|8|
+|save-all-player-spawns|`/save-all-player-spawns`|Saves all entities spawned by online players. Alias: `/saveallplayerspawns`|8|
 |execute|`/execute <subcommand> ... run <command>`|Execute commands as different entities or from different positions. Usage: /execute <subcommand> ... run <command>. Subcommands: as <entity>, at <entity>, positioned <x> <y> <z>. Aliases: `/exec`.|8|
 |crash|`/crash`|Crashes the server. Aliases: `/pumpkin`.|9|
 |rollloot|`/rollloot <loot matrix index> <item id> <amount>`|Given a `loot matrix index`, look for `item id` in that matrix `amount` times and print to the chat box statistics of rolling that loot matrix. Aliases: `/roll-loot`.|8|

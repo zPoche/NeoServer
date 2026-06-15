@@ -475,6 +475,15 @@ void SlashCommandHandler::Startup() {
 	};
 	RegisterCommand(InspectCommand);
 
+	Command InspectDespawnCommand{
+		.help = "Despawn the closest inspected entity",
+		.info = "Finds the closest entity with the given component or LDF variable and despawns it",
+		.aliases = { "inspect-despawn", "inspect-destroy" },
+		.handle = DEVGMCommands::InspectDespawn,
+		.requiredLevel = eGameMasterLevel::DEVELOPER
+	};
+	RegisterCommand(InspectDespawnCommand);
+
 	Command ListSpawnsCommand{
 		.help = "List spawn points for players",
 		.info = "Lists all the character spawn points in the zone. Additionally, this command will display the current scene that plays when the character lands in the next zone, if there is one.",
@@ -638,8 +647,8 @@ void SlashCommandHandler::Startup() {
 	RegisterCommand(SetUiStateCommand);
 
 	Command SpawnCommand{
-		.help = "Spawns an object at your location by id",
-		.info = "Spawns an object at your location by id",
+		.help = "Spawns an object by id",
+		.info = "Spawns an object by id at your position, or with optional position, rotation, and group name",
 		.aliases = { "spawn" },
 		.handle = DEVGMCommands::Spawn,
 		.requiredLevel = eGameMasterLevel::DEVELOPER
@@ -807,6 +816,150 @@ void SlashCommandHandler::Startup() {
 		.requiredLevel = eGameMasterLevel::DEVELOPER
 	};
 	RegisterCommand(DeleteInvenCommand);
+
+	Command GetPlayerIDCommand{
+		.help = "Gets a player's object ID",
+		.info = "Gets your object ID, or that of another character by name if provided",
+		.aliases = { "playerid", "getplayerid" },
+		.handle = DEVGMCommands::GetPlayerID,
+		.requiredLevel = eGameMasterLevel::DEVELOPER
+	};
+	RegisterCommand(GetPlayerIDCommand);
+
+	Command ListGroupCommand{
+		.help = "Lists all entities in the specified group",
+		.info = "Lists all entities in the specified group",
+		.aliases = { "listgroup", "list-group" },
+		.handle = DEVGMCommands::ListGroup,
+		.requiredLevel = eGameMasterLevel::DEVELOPER
+	};
+	RegisterCommand(ListGroupCommand);
+
+	Command ListSpawnedByPlayerCommand{
+		.help = "Lists all entities spawned by a player",
+		.info = "Lists all entities spawned by a player",
+		.aliases = { "listspawnedbyplayer", "list-spawned-by-player" },
+		.handle = DEVGMCommands::ListSpawnedByPlayer,
+		.requiredLevel = eGameMasterLevel::DEVELOPER
+	};
+	RegisterCommand(ListSpawnedByPlayerCommand);
+
+	Command ListSpawnedBySenderCommand{
+		.help = "Lists all entities you have spawned",
+		.info = "Lists all entities you have spawned",
+		.aliases = { "myspawns", "my-spawns", "listmyspawns", "list-my-spawns" },
+		.handle = DEVGMCommands::ListSpawnedBySender,
+		.requiredLevel = eGameMasterLevel::DEVELOPER
+	};
+	RegisterCommand(ListSpawnedBySenderCommand);
+
+	Command ListSpawnedBySpawnerIDCommand{
+		.help = "Lists all entities spawned by the specified object ID",
+		.info = "Lists all entities spawned by the specified object ID",
+		.aliases = { "listspawnedbyid", "list-spawned-by-id" },
+		.handle = DEVGMCommands::ListSpawnedBySpawnerID,
+		.requiredLevel = eGameMasterLevel::DEVELOPER
+	};
+	RegisterCommand(ListSpawnedBySpawnerIDCommand);
+
+	Command ListAllPlayerSpawnsCommand{
+		.help = "Lists all entities spawned by current players",
+		.info = "Lists all entities spawned by current players",
+		.aliases = { "listallplayerspawns", "list-all-player-spawns" },
+		.handle = DEVGMCommands::ListAllPlayerSpawns,
+		.requiredLevel = eGameMasterLevel::DEVELOPER
+	};
+	RegisterCommand(ListAllPlayerSpawnsCommand);
+
+	Command DespawnGroupCommand{
+		.help = "Despawns all entities in the specified group",
+		.info = "Despawns all entities in the specified group",
+		.aliases = { "despawngroup", "despawn-group", "deletegroup", "delete-group" },
+		.handle = DEVGMCommands::DespawnGroup,
+		.requiredLevel = eGameMasterLevel::DEVELOPER
+	};
+	RegisterCommand(DespawnGroupCommand);
+
+	Command DespawnSpawnedByPlayerCommand{
+		.help = "Despawns all entities spawned by a player",
+		.info = "Despawns all entities spawned by a player",
+		.aliases = { "despawnplayerspawns", "despawn-player-spawns", "deleteplayerspawns", "delete-player-spawns" },
+		.handle = DEVGMCommands::DespawnSpawnedByPlayer,
+		.requiredLevel = eGameMasterLevel::DEVELOPER
+	};
+	RegisterCommand(DespawnSpawnedByPlayerCommand);
+
+	Command DespawnSpawnedBySenderCommand{
+		.help = "Despawns all entities you have spawned",
+		.info = "Despawns all entities you have spawned",
+		.aliases = { "despawnmyspawns", "despawn-my-spawns", "deletemyspawns", "delete-my-spawns" },
+		.handle = DEVGMCommands::DespawnSpawnedBySender,
+		.requiredLevel = eGameMasterLevel::DEVELOPER
+	};
+	RegisterCommand(DespawnSpawnedBySenderCommand);
+
+	Command DespawnSpawnedBySpawnerIDCommand{
+		.help = "Despawns all entities spawned by the specified object ID",
+		.info = "Despawns all entities spawned by the specified object ID",
+		.aliases = { "despawnbyspawnerid", "despawn-by-spawner-id", "deletebyspawnerid", "delete-by-spawner-id" },
+		.handle = DEVGMCommands::DespawnSpawnedBySpawnerID,
+		.requiredLevel = eGameMasterLevel::DEVELOPER
+	};
+	RegisterCommand(DespawnSpawnedBySpawnerIDCommand);
+
+	Command DespawnAllPlayerSpawnsCommand{
+		.help = "Despawns all entities spawned by current players",
+		.info = "Despawns all entities spawned by current players",
+		.aliases = { "despawnallplayerspawns", "despawn-all-player-spawns", "deleteallplayerspawns", "delete-all-player-spawns" },
+		.handle = DEVGMCommands::DespawnAllPlayerSpawns,
+		.requiredLevel = eGameMasterLevel::DEVELOPER
+	};
+	RegisterCommand(DespawnAllPlayerSpawnsCommand);
+
+	Command SaveGroupCommand{
+		.help = "Saves all entities in the specified group to the Bug Report Table",
+		.info = "Saves all entities in the specified group to the Bug Report Table",
+		.aliases = { "savegroup", "save-group" },
+		.handle = DEVGMCommands::SaveGroup,
+		.requiredLevel = eGameMasterLevel::DEVELOPER
+	};
+	RegisterCommand(SaveGroupCommand);
+
+	Command SaveSpawnedByPlayerCommand{
+		.help = "Saves all entities spawned by a player to the Bug Report Table",
+		.info = "Saves all entities spawned by a player to the Bug Report Table",
+		.aliases = { "saveplayerspawns", "save-player-spawns" },
+		.handle = DEVGMCommands::SaveSpawnedByPlayer,
+		.requiredLevel = eGameMasterLevel::DEVELOPER
+	};
+	RegisterCommand(SaveSpawnedByPlayerCommand);
+
+	Command SaveSpawnedBySenderCommand{
+		.help = "Saves all entities you have spawned to the Bug Report Table",
+		.info = "Saves all entities you have spawned to the Bug Report Table",
+		.aliases = { "savemyspawns", "save-my-spawns" },
+		.handle = DEVGMCommands::SaveSpawnedBySender,
+		.requiredLevel = eGameMasterLevel::DEVELOPER
+	};
+	RegisterCommand(SaveSpawnedBySenderCommand);
+
+	Command SaveSpawnedBySpawnerIDCommand{
+		.help = "Saves all entities spawned by the specified object ID to the Bug Report Table",
+		.info = "Saves all entities spawned by the specified object ID to the Bug Report Table",
+		.aliases = { "savebyspawnerid", "save-by-spawner-id" },
+		.handle = DEVGMCommands::SaveSpawnedBySpawnerID,
+		.requiredLevel = eGameMasterLevel::DEVELOPER
+	};
+	RegisterCommand(SaveSpawnedBySpawnerIDCommand);
+
+	Command SaveAllPlayerSpawnsCommand{
+		.help = "Saves all entities spawned by current players to the Bug Report Table",
+		.info = "Saves all entities spawned by current players to the Bug Report Table",
+		.aliases = { "saveallplayerspawns", "save-all-player-spawns" },
+		.handle = DEVGMCommands::SaveAllPlayerSpawns,
+		.requiredLevel = eGameMasterLevel::DEVELOPER
+	};
+	RegisterCommand(SaveAllPlayerSpawnsCommand);
 
 	Command ExecuteCommand{
 		.help = "Execute commands with modified context (Minecraft-style)",

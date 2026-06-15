@@ -77,6 +77,23 @@ namespace DEVGMCommands {
 	void Barfight(Entity* entity, const SystemAddress& sysAddr, const std::string args);
 	void Despawn(Entity* entity, const SystemAddress& sysAddr, const std::string args);
 	void Execute(Entity* entity, const SystemAddress& sysAddr, const std::string args);
+	void GetPlayerID(Entity* entity, const SystemAddress& sysAddr, const std::string args);
+	void InspectDespawn(Entity* entity, const SystemAddress& sysAddr, const std::string args);
+	void DespawnGroup(Entity* entity, const SystemAddress& sysAddr, const std::string args);
+	void DespawnSpawnedByPlayer(Entity* entity, const SystemAddress& sysAddr, const std::string args);
+	void DespawnSpawnedBySender(Entity* entity, const SystemAddress& sysAddr, const std::string args);
+	void DespawnSpawnedBySpawnerID(Entity* entity, const SystemAddress& sysAddr, const std::string args);
+	void DespawnAllPlayerSpawns(Entity* entity, const SystemAddress& sysAddr, const std::string args);
+	void ListGroup(Entity* entity, const SystemAddress& sysAddr, const std::string args);
+	void ListSpawnedByPlayer(Entity* entity, const SystemAddress& sysAddr, const std::string args);
+	void ListSpawnedBySender(Entity* entity, const SystemAddress& sysAddr, const std::string args);
+	void ListSpawnedBySpawnerID(Entity* entity, const SystemAddress& sysAddr, const std::string args);
+	void ListAllPlayerSpawns(Entity* entity, const SystemAddress& sysAddr, const std::string args);
+	void SaveGroup(Entity* entity, const SystemAddress& sysAddr, const std::string args);
+	void SaveSpawnedByPlayer(Entity* entity, const SystemAddress& sysAddr, const std::string args);
+	void SaveSpawnedBySender(Entity* entity, const SystemAddress& sysAddr, const std::string args);
+	void SaveSpawnedBySpawnerID(Entity* entity, const SystemAddress& sysAddr, const std::string args);
+	void SaveAllPlayerSpawns(Entity* entity, const SystemAddress& sysAddr, const std::string args);
 }
 
 #endif  //!DEVGMCOMMANDS_H

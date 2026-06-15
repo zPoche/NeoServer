@@ -205,6 +205,14 @@ void InventoryComponent::AddItem(
 	auto* inventory = GetInventory(inventoryType);
 
 	if (!config.values.empty() || bound) {
+		if (inventoryType == eInventoryType::VENDOR_BUYBACK && buybackItems.size() >= 27) {
+			const auto oldestId = buybackItems.back();
+			buybackItems.pop_back();
+			if (auto* oldItem = FindItemById(oldestId)) {
+				oldItem->SetCount(0, true);
+			}
+		}
+
 		const auto slot = preferredSlot != -1 && inventory->IsSlotEmpty(preferredSlot) ? preferredSlot : inventory->FindEmptySlot();
 
 		if (slot == -1) {
@@ -214,6 +222,10 @@ void InventoryComponent::AddItem(
 		}
 
 		auto* item = new Item(lot, inventory, slot, count, config, parent, showFlyingLoot, isModMoveAndEquip, subKey, bound, lootSourceType);
+
+		if (inventoryType == eInventoryType::VENDOR_BUYBACK) {
+			buybackItems.push_front(item->GetId());
+		}
 
 		if (missions != nullptr && !IsTransferInventory(inventoryType)) {
 			missions->Progress(eMissionTaskType::GATHER, lot, LWOOBJID_EMPTY, "", count, IsTransferInventory(inventorySourceType));
@@ -261,6 +273,14 @@ void InventoryComponent::AddItem(
 
 		left -= size;
 
+		if (inventoryType == eInventoryType::VENDOR_BUYBACK && buybackItems.size() >= 27) {
+			const auto oldestId = buybackItems.back();
+			buybackItems.pop_back();
+			if (auto* oldItem = FindItemById(oldestId)) {
+				oldItem->SetCount(0, true);
+			}
+		}
+
 		int32_t slot;
 
 		if (preferredSlot != -1 && inventory->IsSlotEmpty(preferredSlot)) {
@@ -300,6 +320,10 @@ void InventoryComponent::AddItem(
 			continue;
 		}
 		auto* item = new Item(lot, inventory, slot, size, {}, parent, showFlyingLoot, isModMoveAndEquip, subKey, false, lootSourceType);
+
+		if (inventoryType == eInventoryType::VENDOR_BUYBACK) {
+			buybackItems.push_front(item->GetId());
+		}
 
 		isModMoveAndEquip = false;
 	}
@@ -351,6 +375,10 @@ void InventoryComponent::MoveItemToInventory(Item* item, const eInventoryType in
 	}
 
 	auto* origin = item->GetInventory();
+
+	if (origin->GetType() == eInventoryType::VENDOR_BUYBACK) {
+		buybackItems.erase(std::ranges::find(buybackItems, item->GetId()));
+	}
 
 	const auto lot = item->GetLot();
 

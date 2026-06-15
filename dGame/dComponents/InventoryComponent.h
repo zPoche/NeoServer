@@ -4,6 +4,7 @@
 #define INVENTORYCOMPONENT_H
 
 #include <map>
+#include <deque>
 #include <stack>
 
 
@@ -531,6 +532,8 @@ private:
 
 	void LoadGroupXml(const tinyxml2::XMLElement& groups);
 	void UpdateGroupXml(tinyxml2::XMLElement& groups) const;
+
+	std::deque<LWOOBJID> buybackItems;
 };
 
 #endif
