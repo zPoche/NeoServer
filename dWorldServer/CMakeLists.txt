@@ -15,6 +15,8 @@ target_include_directories(WorldServer PRIVATE
 
 target_link_libraries(WorldServer ${COMMON_LIBRARIES}
 	dScripts
+	dScriptsAI
+	dScriptsServer
 	dGameBase
 	dComponents
 	dUtilities
