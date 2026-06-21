@@ -837,10 +837,10 @@ namespace DEVGMCommands {
 				return;
 			}
 
-			rot.SetW(w.value());
-			rot.SetX(x.value());
-			rot.SetY(y.value());
-			rot.SetZ(z.value());
+			rot.w = w.value();
+			rot.x = x.value();
+			rot.y = y.value();
+			rot.z = z.value();
 		} else {
 			rot = comp->GetRotation();
 		}
@@ -975,7 +975,7 @@ namespace DEVGMCommands {
 			const auto& entityRotation = listEntity->GetRotation();
 			entityInfo << "/spawn " << listEntity->GetLOT() << " ";
 			entityInfo << entityPosition.GetX() << " " << entityPosition.GetY() << " " << entityPosition.GetZ() << " ";
-			entityInfo << entityRotation.GetW() << " " << entityRotation.GetX() << " " << entityRotation.GetY() << " " << entityRotation.GetZ() << " ";
+			entityInfo << entityRotation.w << " " << entityRotation.x << " " << entityRotation.y << " " << entityRotation.z << " ";
 			entityInfo << "groupName\n ";
 		}
 
