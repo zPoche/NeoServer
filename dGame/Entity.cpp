@@ -316,15 +316,16 @@ void Entity::Initialize() {
 			controllablePhysics->LoadFromXml(m_Character->GetXMLDoc());
 
 			const auto mapID = Game::server->GetZoneID();
+			const auto& targetSceneName = m_Character->GetTargetScene();
 
 			//If we came from another zone, put us in the starting loc
-			if (m_Character->GetZoneID() != Game::server->GetZoneID() || mapID == 1603) { // Exception for Moon Base as you tend to spawn on the roof.
+			// Exception for Moon Base as you tend to spawn on the roof.
+			// second exception if we have a specified targetScene since that would only be possible in a test map
+			if (m_Character->GetZoneID() != Game::server->GetZoneID() || mapID == 1603 || !targetSceneName.empty()) {
 				NiPoint3 pos;
 				NiQuaternion rot = QuatUtils::IDENTITY;
 
-				const auto& targetSceneName = m_Character->GetTargetScene();
 				auto* targetScene = Game::entityManager->GetSpawnPointEntity(targetSceneName);
-
 				if (m_Character->HasBeenToWorld(mapID) && targetSceneName.empty()) {
 					pos = m_Character->GetRespawnPoint(mapID);
 					rot = Game::zoneManager->GetZone()->GetSpawnRot();
@@ -612,13 +613,14 @@ void Entity::Initialize() {
 
 			if (rebuildResetTime != 0.0f) {
 				quickBuildComponent->SetResetTime(rebuildResetTime);
-
-				// Known bug with moving platform in FV that casues it to build at the end instead of the start.
-				// This extends the smash time so players can ride up the lift.
-				if (m_TemplateID == 9483) {
-					quickBuildComponent->SetResetTime(quickBuildComponent->GetResetTime() + 25);
-				}
 			}
+
+			const auto objectID = GetObjectID();
+			// FV tree handler for when built so it sets the state to moving at the correct time
+			if (GetLOT() == 9483) quickBuildComponent->AddQuickBuildCompleteCallback([objectID](Entity* user) {
+				auto* const entity = Game::entityManager->GetEntity(objectID);
+				if (entity) GameMessages::SendPlatformResync(entity, UNASSIGNED_SYSTEM_ADDRESS, false, 0, 1, 1, eMovementPlatformState::Moving, true);
+				});
 
 			const auto activityID = GetVar<int32_t>(u"activityID");
 
@@ -1017,6 +1019,7 @@ void Entity::WriteBaseReplicaData(RakNet::BitStream& outBitStream, eReplicaPacke
 		const bool hasParent = m_ParentEntity != nullptr || m_SpawnerID != 0;
 		outBitStream.Write(hasParent);
 		if (hasParent) {
+			// 触るな！
 			if (m_ParentEntity != nullptr) outBitStream.Write(GeneralUtils::SetBit(m_ParentEntity->GetObjectID(), static_cast<uint32_t>(eObjectBits::CLIENT)));
 			else if (m_Spawner != nullptr && m_Spawner->m_Info.isNetwork) outBitStream.Write(m_SpawnerID);
 			else outBitStream.Write(GeneralUtils::SetBit(m_SpawnerID, static_cast<uint32_t>(eObjectBits::CLIENT)));
@@ -1615,7 +1618,7 @@ void Entity::Kill(Entity* murderer, const eKillType killType) {
 
 	const auto& grpNameQBShowBricks = GetVarAsString(u"grpNameQBShowBricks");
 	if (!grpNameQBShowBricks.empty()) {
-		for (auto* const spawner :  Game::zoneManager->GetSpawnersByName(grpNameQBShowBricks)) if (spawner) spawner->Spawn();
+		for (auto* const spawner : Game::zoneManager->GetSpawnersByName(grpNameQBShowBricks)) if (spawner) spawner->Spawn();
 		for (auto* const spawner : Game::zoneManager->GetSpawnersInGroup(grpNameQBShowBricks)) if (spawner) spawner->Spawn();
 	}
 
@@ -2233,10 +2236,16 @@ bool Entity::MsgRequestServerObjectInfo(GameMessages::RequestServerObjectInfo& r
 
 	const auto& objTableInfo = table->GetByID(GetLOT());
 
-	objectInfo.PushDebug<AMFStringValue>("Name") = objTableInfo.name;
-	objectInfo.PushDebug<AMFIntValue>("Template ID(LOT)") = GetLOT();
-	objectInfo.PushDebug<AMFStringValue>("Object ID") = std::to_string(GetObjectID());
-	objectInfo.PushDebug<AMFStringValue>("Spawner's Object ID") = std::to_string(GetSpawnerID());
+	objectInfo.PushDebug<AMFStringValue>("Name", "name") = objTableInfo.name;
+	objectInfo.PushDebug<AMFIntValue>("Template ID(LOT)", "LOT") = GetLOT();
+	objectInfo.PushDebug<AMFStringValue>("Object ID", "LWOOBJID") = std::to_string(GetObjectID());
+	objectInfo.PushDebug<AMFStringValue>("Spawner's Object ID", "LWOOBJID") = std::to_string(GetSpawnerID());
+	objectInfo.PushDebug<AMFStringValue>("Owner override", "LWOOBJID") = std::to_string(m_OwnerOverride);
+	auto& children = objectInfo.PushDebug("Child Objects");
+	int i = 1;
+	for (const auto* child : m_ChildEntities) {
+		if (child) children.PushDebug<AMFStringValue>("Child " + std::to_string(i++), "LWOOBJID") = std::to_string(child->GetObjectID());
+	}
 
 	auto& componentDetails = objectInfo.PushDebug("Component Information");
 	for (const auto [id, component] : m_Components) {

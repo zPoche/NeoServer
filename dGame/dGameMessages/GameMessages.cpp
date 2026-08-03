@@ -366,18 +366,19 @@ void GameMessages::SendResetMissions(Entity* entity, const SystemAddress& sysAdd
 
 void GameMessages::SendPlatformResync(Entity* entity, const SystemAddress& sysAddr, bool bStopAtDesiredWaypoint,
 	int iIndex, int iDesiredWaypointIndex, int nextIndex,
-	eMovementPlatformState movementState) {
+	eMovementPlatformState movementState, bool special) {
 	CBITSTREAM;
 	CMSGHEADER;
 
+	const auto objID = entity->GetObjectID();
 	const auto lot = entity->GetLOT();
 
-	if (lot == 12341 || lot == 5027 || lot == 5028 || lot == 14335 || lot == 14447 || lot == 14449 || lot == 11306 || lot == 11308) {
+	if (lot == 12341 || lot == 5027 || lot == 5028 || lot == 14335 || lot == 14447 || lot == 14449 || lot == 11306 || lot == 11308 || lot == 9483) {
 		iDesiredWaypointIndex = (lot == 11306 || lot == 11308) ? 1 : 0;
-		iIndex = 0;
-		nextIndex = 0;
+		iIndex = lot == 9483 ? 1 : 0;
+		nextIndex = lot == 9483 && !special ? 1 : 0;
 		bStopAtDesiredWaypoint = true;
-		movementState = eMovementPlatformState::Stationary;
+		movementState = lot == 9483 && !special ? eMovementPlatformState::Stopped : eMovementPlatformState::Stationary;
 	}
 
 	bitStream.Write(entity->GetObjectID());
@@ -3943,11 +3944,19 @@ void GameMessages::SendSetMountInventoryID(Entity* entity, const LWOOBJID& objec
 	CMSGHEADER;
 	bitStream.Write(entity->GetObjectID());
 	bitStream.Write(MessageType::Game::SET_MOUNT_INVENTORY_ID);
-	bitStream.Write(objectID);
+	bitStream.Write(objectID != LWOOBJID_EMPTY);
+	if (objectID != LWOOBJID_EMPTY) bitStream.Write(objectID);
 
 	SEND_PACKET_BROADCAST;
 }
 
+void GameMessages::UseSkillSet::Serialize(RakNet::BitStream& bitStream) const {
+	bitStream.Write(bRemove);
+	bitStream.Write(possessedId != LWOOBJID_EMPTY);
+	if (possessedId != LWOOBJID_EMPTY) bitStream.Write(possessedId);
+	bitStream.Write(setId != -1);
+	if (setId != -1) bitStream.Write(setId);
+}
 
 void GameMessages::HandleDismountComplete(RakNet::BitStream& inStream, Entity* entity, const SystemAddress& sysAddr) {
 	// Get the objectID from the bitstream
@@ -3983,9 +3992,6 @@ void GameMessages::HandleDismountComplete(RakNet::BitStream& inStream, Entity* e
 
 			// Update the entity that was possessing
 			Game::entityManager->SerializeEntity(entity);
-
-			// We aren't mounted so remove the stun
-			GameMessages::SendSetStunned(entity->GetObjectID(), eStateChangeType::POP, UNASSIGNED_SYSTEM_ADDRESS, LWOOBJID_EMPTY, true, false, true, false, false, false, false, true, true, true, true, true, true, true, true, true);
 		}
 	}
 }
@@ -3993,10 +3999,14 @@ void GameMessages::HandleDismountComplete(RakNet::BitStream& inStream, Entity* e
 
 void GameMessages::HandleAcknowledgePossession(RakNet::BitStream& inStream, Entity* entity, const SystemAddress& sysAddr) {
 	Game::entityManager->SerializeEntity(entity);
-	LWOOBJID objectId{};
-	inStream.Read(objectId);
-	auto* mount = Game::entityManager->GetEntity(objectId);
-	if (mount) Game::entityManager->SerializeEntity(mount);
+	bool hasObjectId{};
+	inStream.Read(hasObjectId);
+	if (hasObjectId) {
+		LWOOBJID objectId{};
+		inStream.Read(objectId);
+		auto* mount = Game::entityManager->GetEntity(objectId);
+		if (mount) Game::entityManager->SerializeEntity(mount);
+	}
 }
 
 //Racing
@@ -6484,8 +6494,8 @@ namespace GameMessages {
 	}
 
 	void TeamPickupItem::Serialize(RakNet::BitStream& stream) const {
-		stream.Write(lootID);	
-		stream.Write(lootOwnerID);	
+		stream.Write(lootID);
+		stream.Write(lootOwnerID);
 	}
 
 	void ToggleGMInvis::Serialize(RakNet::BitStream& stream) const {
