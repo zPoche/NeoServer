@@ -45,6 +45,7 @@ enum class BehaviorSlot : int32_t;
 enum class eVendorTransactionResult : uint32_t;
 enum class eReponseMoveItemBetweenInventoryTypeCode : int32_t;
 enum class eMissionState : int;
+enum class AiState : uint32_t;
 
 enum class eCameraTargetCyclingMode : int32_t {
 	ALLOW_CYCLE_TEAMMATES,
@@ -103,9 +104,11 @@ namespace GameMessages {
 	void SendPlayNDAudioEmitter(Entity* entity, const SystemAddress& sysAddr, std::string audioGUID);
 
 	void SendStartPathing(Entity* entity);
+
+	// special is for the FV tree platform, feature is complete if we just do that so meh
 	void SendPlatformResync(Entity* entity, const SystemAddress& sysAddr, bool bStopAtDesiredWaypoint = false,
 		int iIndex = 0, int iDesiredWaypointIndex = 1, int nextIndex = 1,
-		eMovementPlatformState movementState = eMovementPlatformState::Moving);
+		eMovementPlatformState movementState = eMovementPlatformState::Moving, bool special = false);
 
 	void SendResetMissions(Entity* entity, const SystemAddress& sysAddr, const int32_t missionid = -1);
 	void SendRestoreToPostLoadStats(Entity* entity, const SystemAddress& sysAddr);
@@ -961,6 +964,29 @@ namespace GameMessages {
 		ChildRemoved() : GameMsg(MessageType::Game::CHILD_REMOVED) {}
 
 		LWOOBJID childID{};
+	};
+
+	struct UseSkillSet : public GameMsg {
+		UseSkillSet() : GameMsg(MessageType::Game::USE_SKILL_SET) {}
+		void Serialize(RakNet::BitStream& bitStream) const override;
+
+		bool bRemove{};
+		LWOOBJID possessedId{ LWOOBJID_EMPTY };
+		int32_t setId{ -1 };
+	};
+
+	struct ObjectLoaded : public GameMsg {
+		ObjectLoaded() : GameMsg(MessageType::Game::OBJECT_LOADED) {}
+
+		LWOOBJID objectID{};
+		LOT lot{};
+	};
+
+	struct NotifyCombatAIStateChange : public GameMsg {
+		NotifyCombatAIStateChange() : GameMsg(MessageType::Game::NOTIFY_COMBAT_AI_STATE_CHANGE) {}
+
+		AiState newState{};
+		AiState prevState{};
 	};
 };
 #endif // GAMEMESSAGES_H
